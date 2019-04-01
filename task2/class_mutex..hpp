@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 
-class Massive
+class MassiveFirstTask
 {
 	private:
 		std::vector<int> races = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
@@ -14,10 +14,12 @@ class Massive
 		// Massive(const vector<int>& races)
 		// {
 		// }
-		Massive(){}
+		MassiveFirstTask(){}
+		MassiveFirstTask& operator=(MassiveFirstTask const&);
 		void summ(int a, int b, int c, int& d)
 		{
 		//std::lock_guard<std::mutex> lock(some_mutex);
 			d = races[a] + races[b] + races[c]; 
+			std::cout<<d<<" ";
 		}
 };
