@@ -4,18 +4,50 @@ int main()
 	int numb;
 	std::cin>>numb;
 	std::vector<std::thread> threads;
+	int choosenumber = 0;
+	std::cin>>choosenumber;
 	std::srand(unsigned(std::time(0)));
-	int a = std::rand()%10;
-	int b = std::rand()%10;
-	int c = std::rand()%10;
-	for (int i = 0; i < numb; ++i)
+	switch (choosenumber)
 	{
-		MassiveFirstTask firstTask;
-		a = std::rand()%10;
-		b = std::rand()%10;
-		c = std::rand()%10;
-		threads.push_back(std::thread(&MassiveFirstTask::summ, firstTask, a, b, c));
+		case 1:
+		{
+			int a = std::rand()%10;
+			int b = std::rand()%10;
+			int c = std::rand()%10;
+			for (int i = 0; i < numb; ++i)
+			{
+				MassiveFirstTask firstTask;
+				threads.push_back(std::thread(&MassiveFirstTask::summ, firstTask, a, b, c));
+				a = std::rand()%10;
+				b = std::rand()%10;
+				c = std::rand()%10;
+			}
+			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			break;
+		}
+
+		case 2:
+		{	
+			int a = std::rand()%10;
+			int b = std::rand()%10;
+			int c = std::rand()%10;
+			for (int i = 0; i < numb; ++i)
+			{
+				MassiveSecondTask secondTask;
+				threads.push_back(std::thread(&MassiveSecondTask::summ, secondTask, a, b, c));
+				a = std::rand()%10;
+				b = std::rand()%10;
+				c = std::rand()%10;
+			}
+			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			break;
+		}
+		
+		default:
+		{
+			std::cout<<"Choose another number!!!";
+			break;
+		}
 	}
-	std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
 	return 0;
 }
