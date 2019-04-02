@@ -1,4 +1,5 @@
 #include "class_mutex.hpp"
+#include <algorithm>
 int main()
 {
 	int numb;
