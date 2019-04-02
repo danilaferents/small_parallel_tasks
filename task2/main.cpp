@@ -14,9 +14,10 @@ int main()
 			int a = std::rand()%10;
 			int b = std::rand()%10;
 			int c = std::rand()%10;
+			MassiveFirstTask firstTask;
 			for (int i = 0; i < numb; ++i)
 			{
-				MassiveFirstTask firstTask;
+				
 				threads.push_back(std::thread(&MassiveFirstTask::summ, firstTask, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
@@ -31,9 +32,10 @@ int main()
 			int a = std::rand()%10;
 			int b = std::rand()%10;
 			int c = std::rand()%10;
+			MassiveSecondTask secondTask;
 			for (int i = 0; i < numb; ++i)
 			{
-				MassiveSecondTask secondTask;
+				
 				threads.push_back(std::thread(&MassiveSecondTask::summ, secondTask, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
