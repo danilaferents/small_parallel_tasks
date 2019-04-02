@@ -45,7 +45,23 @@ int main()
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
 			break;
 		}
-		
+		case 3:
+		{
+			int a = std::rand()%10;
+			int b = std::rand()%10;
+			int c = std::rand()%10;
+			MassiveThirdTask thirdTask;
+			for (int i = 0; i < numb; ++i)
+			{
+				
+				threads.push_back(std::thread(&MassiveThirdTask::summ, thirdTask, a, b, c));
+				a = std::rand()%10;
+				b = std::rand()%10;
+				c = std::rand()%10;
+			}
+			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			break;
+		}
 		default:
 		{
 			std::cout<<"Choose another number!!!";
