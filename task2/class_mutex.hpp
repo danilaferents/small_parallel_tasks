@@ -28,46 +28,21 @@ class MassiveTryMutex
 		}
 		void SummThirdTask(int a, int b, int c)
 		{
-			// while(!std::try_lock(mutexvector[a], mutexvector[b], mutexvector[c]));
-			// std::cout<<races[a] + races[b] + races[c]<<" ";
-			// mutexvector[a].unlock();
-			// mutexvector[b].unlock();
-			// mutexvector[c].unlock();
-			while(true)
-			{
-				if(mutexvector[a].try_lock())
-				{
-					if (mutexvector[b].try_lock())
-					{
-						if (mutexvector[c].try_lock()) 
-						{
-							std::cout<<races[a] + races[b] + races[c]<<" ";
-							mutexvector[a].unlock();
-							mutexvector[b].unlock();
-							mutexvector[c].unlock();
-							break;
-						}
-						else
-						{
-							mutexvector[a].unlock();
-							mutexvector[b].unlock();
-							// std::this_thread::sleep_for(interval);
-						}
-					}
-					else
-					{
-						mutexvector[a].unlock();
-						// std::this_thread::sleep_for(interval);
-					}
-				} 
-			}
+			while(!std::try_lock(mutexvector[a], mutexvector[b], mutexvector[c]));
+			std::cout<<races[a] + races[b] + races[c]<<" ";
+			mutexvector[a].unlock();
+			mutexvector[b].unlock();
+			mutexvector[c].unlock();
 		}
 		void SummForthTask(int a, int b, int c)
 		{
 			if (a > b) std::swap (a,b);
 			if (b > c) std::swap (b,c);
 			if (a > b) std::swap (a,b);
-			std::scoped_lock _lock{mutexvector[a], mutexvector[b], mutexvector[c]};
+			// std::scoped_lock _lock (mutexvector[a], mutexvector[b], mutexvector[c]);
+			std::scoped_lock lock_a(mutexvector[a]);
+			std::scoped_lock lock_b(mutexvector[b]);
+			std::scoped_lock lock_c(mutexvector[c]);
 			std::cout<<races[a] + races[b] + races[c]<<" ";
 		}
 };

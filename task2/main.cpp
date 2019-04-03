@@ -8,6 +8,7 @@ int main()
 	int choosenumber = 0;
 	std::cin>>choosenumber;
 	MassiveTryMutex tryMutex; 
+	std::chrono::time_point<std::chrono::high_resolution_clock> start, stop;
 	switch (choosenumber)
 	{
 		case 1:
@@ -18,6 +19,7 @@ int main()
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
 
+			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{
 
@@ -28,7 +30,10 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
+			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			std::chrono::duration<double> diff = (stop-start); 
+			std::cout<<std::endl<<"First done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
 		}
 
@@ -40,6 +45,7 @@ int main()
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
 
+			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{	
 				threads.push_back(std::thread(&MassiveTryMutex::SummSecondTask, tryMutex, a, b, c));
@@ -49,7 +55,10 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
+			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			std::chrono::duration<double> diff = (stop-start); 
+			std::cout<<std::endl<<"Second done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
 		}
 		case 3:
@@ -60,6 +69,7 @@ int main()
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
 
+			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{
 				threads.push_back(std::thread(&MassiveTryMutex::SummThirdTask, tryMutex, a, b, c));
@@ -69,7 +79,10 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
+			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			std::chrono::duration<double> diff = (stop-start); 
+			std::cout<<std::endl<<"Third done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
 		}
 		case 4:
@@ -80,6 +93,7 @@ int main()
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
 
+			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{
 				// std::cout<<a<<" "<<b<<" "<<c<<std::endl;
@@ -90,7 +104,10 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
+			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			std::chrono::duration<double> diff = (stop-start); 
+			std::cout<<std::endl<<"Forth done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
 		}
 		default:
