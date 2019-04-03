@@ -42,39 +42,58 @@ class MassiveThirdTask
 		MassiveThirdTask(){}
 		void summ(int a, int b, int c)
 		{
-			while(true)
-			{
-				if(mutexvector[a].try_lock())
-				{
-					std::cout<<"1 ";
-					if (mutexvector[b].try_lock())
-					{
-						std::cout<<"2 ";
-						if (mutexvector[c].try_lock()) 
-						{
-							std::cout<<"3 ";
-							// std::cout<<races[a] + races[b] + races[c]<<" ";
-							mutexvector[a].unlock();
-							mutexvector[b].unlock();
-							mutexvector[c].unlock();
-							break;
-						}
-						else
-						{
-							std::cout<<"4 ";
-							mutexvector[a].unlock();
-							mutexvector[b].unlock();
-							// std::this_thread::sleep_for(interval);
-						}
-					}
-					else
-					{
-						std::cout<<"5 ";
-						mutexvector[a].unlock();
-						// std::this_thread::sleep_for(interval);
-					}
-				} 
-			}
-			// std::cout<<mutexvector[a].try_lock()<<" "<<mutexvector[b].try_lock()<<" "<<mutexvector[c].try_lock()<<std::endl;
+			// while(true)
+			// {
+			// 	if(mutexvector[a].try_lock())
+			// 	{
+			// 		std::cout<<"1 ";
+			// 		if (mutexvector[b].try_lock())
+			// 		{
+			// 			std::cout<<"2 ";
+			// 			if (mutexvector[c].try_lock()) 
+			// 			{
+			// 				std::cout<<"3 ";
+			// 				// std::cout<<races[a] + races[b] + races[c]<<" ";
+			// 				mutexvector[a].unlock();
+			// 				mutexvector[b].unlock();
+			// 				mutexvector[c].unlock();
+			// 				break;
+			// 			}
+			// 			else
+			// 			{
+			// 				std::cout<<"4 ";
+			// 				mutexvector[a].unlock();
+			// 				mutexvector[b].unlock();
+			// 				// std::this_thread::sleep_for(interval);
+			// 			}
+			// 		}
+			// 		else
+			// 		{
+			// 			std::cout<<"5 ";
+			// 			mutexvector[a].unlock();
+			// 			// std::this_thread::sleep_for(interval);
+			// 		}
+			// 	} 
+			// }
+			while(!std::try_lock(mutexvector[a], mutexvector[b], mutexvector[c]));
+			std::cout<<races[a] + races[b] + races[c]<<" ";
+			mutexvector[a].unlock();
+			mutexvector[b].unlock();
+			mutexvector[c].unlock();
+		}
+};
+class MassiveForthTask
+{
+	private:
+		 std::vector<int> races = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	public:
+		MassiveForthTask(){}
+		void summ(int a, int b, int c)
+		{
+			if (a > b) std::swap (a,b);
+			if (b > c) std::swap (b,c);
+			if (a > b) std::swap (a,b);
+			std::scoped_lock _lock{mutexvector[a], mutexvector[b], mutexvector[c]};
+			std::cout<<races[a] + races[b] + races[c]<<" ";
 		}
 };

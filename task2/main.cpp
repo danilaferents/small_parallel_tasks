@@ -14,15 +14,19 @@ int main()
 		{
 			int a = std::rand()%10;
 			int b = std::rand()%10;
+			while (a==b)  b = std::rand()%10;
 			int c = std::rand()%10;
+			while (a==c || b==c) c = std::rand()%10;
 			MassiveFirstTask firstTask;
 			for (int i = 0; i < numb; ++i)
 			{
-				
+
 				threads.push_back(std::thread(&MassiveFirstTask::summ, firstTask, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
+				while (a==b) b = std::rand()%10;
 				c = std::rand()%10;
+				while (a==c || b==c) c = std::rand()%10;
 			}
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
 			break;
@@ -32,7 +36,9 @@ int main()
 		{	
 			int a = std::rand()%10;
 			int b = std::rand()%10;
+			while (a==b) b = std::rand()%10;
 			int c = std::rand()%10;
+			while (a==c || b==c) c = std::rand()%10;
 			MassiveSecondTask secondTask;
 			for (int i = 0; i < numb; ++i)
 			{
@@ -40,7 +46,9 @@ int main()
 				threads.push_back(std::thread(&MassiveSecondTask::summ, secondTask, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
+				while (a==b) b = std::rand()%10;
 				c = std::rand()%10;
+				while (a==c || b==c) c = std::rand()%10;
 			}
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
 			break;
@@ -49,15 +57,39 @@ int main()
 		{
 			int a = std::rand()%10;
 			int b = std::rand()%10;
+			while (a==b) b = std::rand()%10;
 			int c = std::rand()%10;
+			while (a==c || b==c) c = std::rand()%10;
 			MassiveThirdTask thirdTask;
 			for (int i = 0; i < numb; ++i)
 			{
-				
 				threads.push_back(std::thread(&MassiveThirdTask::summ, thirdTask, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
+				while (a==b) b = std::rand()%10;
 				c = std::rand()%10;
+				while (a==c || b==c) c = std::rand()%10;
+			}
+			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			break;
+		}
+		case 4:
+		{
+			int a = std::rand()%10;
+			int b = std::rand()%10;
+			while (a==b) b = std::rand()%10;
+			int c = std::rand()%10;
+			while (a==c || b==c) c = std::rand()%10;
+			MassiveForthTask forthTask;
+			for (int i = 0; i < numb; ++i)
+			{
+				// std::cout<<a<<" "<<b<<" "<<c<<std::endl;
+				threads.push_back(std::thread(&MassiveForthTask::summ, forthTask, a, b, c));
+				a = std::rand()%10;
+				b = std::rand()%10;
+				while (a==b) b = std::rand()%10;
+				c = std::rand()%10;
+				while (a==c || b==c) c = std::rand()%10;
 			}
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
 			break;
