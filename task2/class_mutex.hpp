@@ -28,11 +28,39 @@ class MassiveTryMutex
 		}
 		void SummThirdTask(int a, int b, int c)
 		{
-			while(!std::try_lock(mutexvector[a], mutexvector[b], mutexvector[c]));
-			std::cout<<races[a] + races[b] + races[c]<<" ";
-			mutexvector[a].unlock();
-			mutexvector[b].unlock();
-			mutexvector[c].unlock();
+			// while(!std::try_lock(mutexvector[a], mutexvector[b], mutexvector[c]));
+			// std::cout<<races[a] + races[b] + races[c]<<" ";
+			// mutexvector[a].unlock();
+			// mutexvector[b].unlock();
+			// mutexvector[c].unlock();
+			while(true)
+			{
+				if(mutexvector[a].try_lock())
+				{
+					if (mutexvector[b].try_lock())
+					{
+						if (mutexvector[c].try_lock()) 
+						{
+							std::cout<<races[a] + races[b] + races[c]<<" ";
+							mutexvector[a].unlock();
+							mutexvector[b].unlock();
+							mutexvector[c].unlock();
+							break;
+						}
+						else
+						{
+							mutexvector[a].unlock();
+							mutexvector[b].unlock();
+							// std::this_thread::sleep_for(interval);
+						}
+					}
+					else
+					{
+						mutexvector[a].unlock();
+						// std::this_thread::sleep_for(interval);
+					}
+				} 
+			}
 		}
 		void SummForthTask(int a, int b, int c)
 		{
