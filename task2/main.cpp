@@ -7,7 +7,7 @@ int main()
 	std::vector<std::thread> threads;
 	int choosenumber = 0;
 	std::cin>>choosenumber;
-	std::srand(unsigned(std::time(0)));
+	MassiveTryMutex tryMutex; 
 	switch (choosenumber)
 	{
 		case 1:
@@ -17,11 +17,11 @@ int main()
 			while (a==b)  b = std::rand()%10;
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
-			MassiveFirstTask firstTask;
+
 			for (int i = 0; i < numb; ++i)
 			{
 
-				threads.push_back(std::thread(&MassiveFirstTask::summ, firstTask, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummFirstTask, tryMutex, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -39,11 +39,10 @@ int main()
 			while (a==b) b = std::rand()%10;
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
-			MassiveSecondTask secondTask;
+
 			for (int i = 0; i < numb; ++i)
-			{
-				
-				threads.push_back(std::thread(&MassiveSecondTask::summ, secondTask, a, b, c));
+			{	
+				threads.push_back(std::thread(&MassiveTryMutex::SummSecondTask, tryMutex, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -60,10 +59,10 @@ int main()
 			while (a==b) b = std::rand()%10;
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
-			MassiveThirdTask thirdTask;
+
 			for (int i = 0; i < numb; ++i)
 			{
-				threads.push_back(std::thread(&MassiveThirdTask::summ, thirdTask, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummThirdTask, tryMutex, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -80,11 +79,11 @@ int main()
 			while (a==b) b = std::rand()%10;
 			int c = std::rand()%10;
 			while (a==c || b==c) c = std::rand()%10;
-			MassiveForthTask forthTask;
+
 			for (int i = 0; i < numb; ++i)
 			{
 				// std::cout<<a<<" "<<b<<" "<<c<<std::endl;
-				threads.push_back(std::thread(&MassiveForthTask::summ, forthTask, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummForthTask, tryMutex, a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
