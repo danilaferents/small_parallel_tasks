@@ -49,6 +49,10 @@ namespace MTDS
 			{
 				this->value = value;
 			}
+			void setNext(const HashNode<T> *next)
+			{
+				this->next = next;
+			}
 	};
 
 	template <typename T>
@@ -56,15 +60,15 @@ namespace MTDS
 	{
 		private:
 			HashNode<T>* head; 
-			mutable std::shared_mutex _mutex;
+			mutable std::shared_timed_mutex _mutex;
 		public:
 
 			//destructor
 			~HashCage()
 			{
 				std::unique_lock <std::shared_mutex> lock(_mutex);
-				HashNode<int>* next = head;
-				HashNode<int>* current = nullptr;
+				HashNode<T>* next = head;
+				HashNode<T>* current = nullptr;
 				while (next != nullptr)
 				{
 					current = next;
@@ -81,13 +85,40 @@ namespace MTDS
 			bool findKeyValue(const int& key, T& value)
 			{
 				std::shared_lock <std::shared_mutex> _mutex;
-				HashNode* curent = head;
-				while (head != nullptr)
+				HashNode<T>* current = head;
+				while (current != nullptr)
 				{
-					if (head->getValue == value)
+					if (current->getKey == key)
 					{
-
+						value = current -> getValue();
+						return true;
 					}
+					current = current->getNext();
+				}
+				return false;
+			}
+
+			void insert(const int& key, const T& value)
+			{
+				std::unique_lock<std::shared_mutex> _mutex;
+				HashNode<T>* current = head;
+				HashNode<T>* beforeCurrent = head;
+				while (current != nullptr && current->getKey() != key)
+				{
+					beforeCurrent = current;
+					current = current->getNext();
+				}
+				if (current == nullptr) 
+				{
+					if (head != nullptr)
+					{
+						beforeCurrent->setNext(new HashNode<T>(key, value));
+					} else {
+						head=new HashNode<T>(key,value)
+					}
+				}
+				else {
+					current->setValue(value);
 				}
 			}
 			// void deleteCage()
