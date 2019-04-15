@@ -54,3 +54,33 @@ class MassiveTryMutex
 			races[c]=races[a] + races[b] + races[c];
 		}
 };
+while(true)
+{
+	if(mutexvector[a].try_lock())
+	{
+		if (mutexvector[b].try_lock())
+		{
+			if (mutexvector[c].try_lock()) 
+			{
+				races[a]=races[a] + races[b] + races[c];
+				races[b]=races[a] + races[b] + races[c];
+				races[c]=races[a] + races[b] + races[c];
+				mutexvector[a].unlock();
+				mutexvector[b].unlock();
+				mutexvector[c].unlock();
+				break;
+			}
+			else
+			{
+				mutexvector[a].unlock();
+				mutexvector[b].unlock();
+				// std::this_thread::sleep_for(interval);
+			}
+		}
+		else
+		{
+			mutexvector[a].unlock();
+			// std::this_thread::sleep_for(interval);
+		}
+	} 
+}
