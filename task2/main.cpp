@@ -23,7 +23,7 @@ int main()
 			for (int i = 0; i < numb; ++i)
 			{
 
-				threads.push_back(std::thread(&MassiveTryMutex::SummFirstTask, tryMutex, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummFirstTask, std::ref(tryMutex), a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -48,7 +48,7 @@ int main()
 			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{	
-				threads.push_back(std::thread(&MassiveTryMutex::SummSecondTask, tryMutex, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummSecondTask, std::ref(tryMutex), a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -72,7 +72,7 @@ int main()
 			start = std::chrono::high_resolution_clock::now();
 			for (int i = 0; i < numb; ++i)
 			{
-				threads.push_back(std::thread(&MassiveTryMutex::SummThirdTask, tryMutex, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummThirdTask, std::ref(tryMutex), a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
@@ -97,7 +97,7 @@ int main()
 			for (int i = 0; i < numb; ++i)
 			{
 				// std::cout<<a<<" "<<b<<" "<<c<<std::endl;
-				threads.push_back(std::thread(&MassiveTryMutex::SummForthTask, tryMutex, a, b, c));
+				threads.push_back(std::thread(&MassiveTryMutex::SummForthTask, std::ref(tryMutex), a, b, c));
 				a = std::rand()%10;
 				b = std::rand()%10;
 				while (a==b) b = std::rand()%10;
