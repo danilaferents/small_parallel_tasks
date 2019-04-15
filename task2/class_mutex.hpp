@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <algorithm>
+#include<functional>
 
 std::mutex mutextask2;
 std::vector<std::mutex> mutexvector(10);
