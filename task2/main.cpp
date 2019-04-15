@@ -30,8 +30,8 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
-			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = (stop-start); 
 			std::cout<<std::endl<<"First done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
@@ -55,8 +55,8 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
-			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = (stop-start); 
 			std::cout<<std::endl<<"Second done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
@@ -79,8 +79,8 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
-			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = (stop-start); 
 			std::cout<<std::endl<<"Third done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
@@ -104,8 +104,8 @@ int main()
 				c = std::rand()%10;
 				while (a==c || b==c) c = std::rand()%10;
 			}
-			stop = std::chrono::high_resolution_clock::now();
 			std::for_each(threads.begin(), threads.end(),std::mem_fn(&std::thread::join));
+			stop = std::chrono::high_resolution_clock::now();
 			std::chrono::duration<double> diff = (stop-start); 
 			std::cout<<std::endl<<"Forth done! "<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
 			break;
