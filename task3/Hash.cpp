@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <shared_mutex>
 #include <mutex>
+#include <functional>
 #include <string>
+constexpr size_t HASH_SIZE = 1031;
 //Multithreaded data structes library
 namespace MTDS
 {
@@ -84,11 +86,11 @@ namespace MTDS
 			//shared_lock is used because of superioir of read over write
 			bool findKeyValue(const int& key, T& value)
 			{
-				std::shared_lock <std::shared_mutex> _mutex;
+				std::shared_lock <std::shared_mutex> _lock(_mutex);
 				HashNode<T>* current = head;
 				while (current != nullptr)
 				{
-					if (current->getKey == key)
+					if (current->getKey() == key)
 					{
 						value = current -> getValue();
 						return true;
@@ -98,11 +100,11 @@ namespace MTDS
 				return false;
 			}
 
-			void insert(const int& key, const T& value)
+			void insertValue(const int& key, const T& value)
 			{
-				std::unique_lock<std::shared_mutex> _mutex;
+				std::unique_lock<std::shared_mutex> _lock(_mutex);
 				HashNode<T>* current = head;
-				HashNode<T>* beforeCurrent = head;
+				HashNode<T>* beforeCurrent = nullptr;
 				while (current != nullptr && current->getKey() != key)
 				{
 					beforeCurrent = current;
@@ -114,12 +116,38 @@ namespace MTDS
 					{
 						beforeCurrent->setNext(new HashNode<T>(key, value));
 					} else {
-						head=new HashNode<T>(key,value)
+						head=new HashNode<T>(key,value);
 					}
 				}
-				else {
-					current->setValue(value);
+				// else {
+				// 	current->setValue(value);
+				// }
+			}
+
+			void deleteValue(const int&key)
+			{
+				//we can unlock unique_lock if we need
+				std::unique_lock<std::shared_mutex> _lock(_mutex);
+				HashNode<T>* current = head;
+				HashNode<T>* beforeCurrent = nullptr;
+				while (current != nullptr &&  current->getKey() != key)
+				{
+					current = current->getNext();
+					beforeCurrent = current;
 				}
+				if (current != nullptr)
+				{
+					if (current == head)
+					{
+						 head = current->getNext();
+					}
+					else 
+					{ 
+						beforeCurrent->setNext(current->getNext());
+					}
+					delete current;
+				} 
+
 			}
 			// void deleteCage()
 			// {
@@ -134,6 +162,56 @@ namespace MTDS
 			// 	}
 			// 	head = nullptr;
 			// }
+	};
+	template <typename T>
+	class HashTable
+	{
+		private: 
+			const int hashSize;
+			std::hash<int> hashFunction;
+			HashCage<T> * hashTable;
+		void countHashFn(size_t& hashNum,const int& key) const
+		{
+			hashNum = hashFunction(key) % hashSize;
+		}
+		public:
+			
+			//constructor
+			HashTable(size_t _hashSize = HASH_SIZE) : hashSize(_hashSize)
+			{
+				hashTable = new HashCage<int>[hashSize];
+			}
+
+			//destructor
+			~HashTable()
+			{
+				delete [] hashTable;
+			}
+
+			//we do not have copy and move constructors yet
+			hashTable (const HashMap&) = delete;
+            hashTable (HashMap&&) = delete;
+            hashTable& operator=(const HashMap&) = delete;  
+            hashTable& operator=(HashMap&&) = delete;
+
+			bool find(const int& key,T& value)
+			{
+				size_t hashNum;
+				countHashFn(hashNum, key);
+				return hashTable[hashNum].findKeyValue(key, value);
+			}
+			void insert(const int& key, const T& value)
+			{
+				size_t hashNum;
+				countHashFn(hashNum, key);
+				hashTable[hashNum].insertValue(key, value);
+			}
+			void deleteValue(const int& key, const T& value)
+			{	
+				size_t hashNum;
+				countHashFn(hashNum, key);
+				hashTable[hashNum].insertValue(key, value);
+			}
 	};
 }
 
