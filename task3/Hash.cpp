@@ -1,7 +1,7 @@
 // #ifndef HashNode_hpp
 // #define HashNode_hpp
 
-#include <stdio.h>
+#include <iostream>
 #include <shared_mutex>
 #include <mutex>
 #include <functional>
@@ -19,6 +19,7 @@ namespace MTDS
 			T value; //hash value associated with hash key
 			HashNode *next; //pointer to the next 
 		public:
+			std::mutex _mutex;
 			//constructors 
 			HashNode() : next(nullptr) {}
 			// HashNode(int key, std::string value) : next(nullptr), key(key), value(value) {}
@@ -32,16 +33,16 @@ namespace MTDS
 			}
 
 			//getters 
-			const int& getKey() const
+			const int& getKey() 
 			{
 				return key;
 			}
 			// const std::string& getValue() const
-			const T& getValue() const
+			T& getValue() 
 			{
 				return value; 
 			}
-			const HashNode* getNext()
+			HashNode* getNext() 
 			{
 				return next;
 			}
@@ -51,7 +52,7 @@ namespace MTDS
 			{
 				this->value = value;
 			}
-			void setNext(const HashNode<T> *next)
+			void setNext(HashNode<T> *next)
 			{
 				this->next = next;
 			}
@@ -68,7 +69,7 @@ namespace MTDS
 			//destructor
 			~HashCage()
 			{
-				std::unique_lock <std::shared_mutex> lock(_mutex);
+				std::unique_lock <std::shared_timed_mutex> lock(_mutex);
 				HashNode<T>* next = head;
 				HashNode<T>* current = nullptr;
 				while (next != nullptr)
@@ -84,25 +85,27 @@ namespace MTDS
 			HashCage() : head(nullptr) {}
 
 			//shared_lock is used because of superioir of read over write
-			bool findKeyValue(const int& key, T& value)
+			void findKeyValue(const int& key, T& value, int& result)
 			{
-				std::shared_lock <std::shared_mutex> _lock(_mutex);
+				std::shared_lock <std::shared_timed_mutex> _lock(_mutex);
 				HashNode<T>* current = head;
 				while (current != nullptr)
 				{
 					if (current->getKey() == key)
 					{
 						value = current -> getValue();
-						return true;
+						result = 1;
+						return;
 					}
 					current = current->getNext();
 				}
-				return false;
+				result =0;
+				value = 0;
 			}
-
+			//задать вопрос про bool
 			void insertValue(const int& key, const T& value)
 			{
-				std::unique_lock<std::shared_mutex> _lock(_mutex);
+				std::unique_lock<std::shared_timed_mutex> _lock(_mutex);
 				HashNode<T>* current = head;
 				HashNode<T>* beforeCurrent = nullptr;
 				while (current != nullptr && current->getKey() != key)
@@ -127,7 +130,7 @@ namespace MTDS
 			void deleteValue(const int&key)
 			{
 				//we can unlock unique_lock if we need
-				std::unique_lock<std::shared_mutex> _lock(_mutex);
+				std::unique_lock<std::shared_timed_mutex> _lock(_mutex);
 				HashNode<T>* current = head;
 				HashNode<T>* beforeCurrent = nullptr;
 				while (current != nullptr &&  current->getKey() != key)
@@ -148,6 +151,15 @@ namespace MTDS
 					delete current;
 				} 
 
+			}
+			void print()
+			{
+				HashNode<T>* current = head;
+				while (current != nullptr)
+				{
+					std::cout<<current->getKey()<<" "<<current->getValue()<<std::endl;
+					current = current->getNext();
+				}
 			}
 			// void deleteCage()
 			// {
@@ -170,12 +182,12 @@ namespace MTDS
 			const int hashSize;
 			std::hash<int> hashFunction;
 			HashCage<T> * hashTable;
-		void countHashFn(size_t& hashNum,const int& key) const
+		void countHashFn(size_t& hashNum,const int& key) 
 		{
 			hashNum = hashFunction(key) % hashSize;
 		}
 		public:
-			
+
 			//constructor
 			HashTable(size_t _hashSize = HASH_SIZE) : hashSize(_hashSize)
 			{
@@ -189,16 +201,16 @@ namespace MTDS
 			}
 
 			//we do not have copy and move constructors yet
-			hashTable (const HashMap&) = delete;
-            hashTable (HashMap&&) = delete;
-            hashTable& operator=(const HashMap&) = delete;  
-            hashTable& operator=(HashMap&&) = delete;
+			HashTable (const HashTable&) = delete;
+            HashTable (HashTable&&) = delete;
+            HashTable& operator=(const HashTable&) = delete;  
+            HashTable& operator=(HashTable&&) = delete;
 
-			bool find(const int& key,T& value)
+			void find(const int& key,T& value, int& result)
 			{
 				size_t hashNum;
 				countHashFn(hashNum, key);
-				return hashTable[hashNum].findKeyValue(key, value);
+				hashTable[hashNum].findKeyValue(key, value, result);
 			}
 			void insert(const int& key, const T& value)
 			{
@@ -206,20 +218,20 @@ namespace MTDS
 				countHashFn(hashNum, key);
 				hashTable[hashNum].insertValue(key, value);
 			}
-			void deleteValue(const int& key, const T& value)
+			void deleteValue(const int& key)
 			{	
 				size_t hashNum;
 				countHashFn(hashNum, key);
-				hashTable[hashNum].insertValue(key, value);
+				hashTable[hashNum].deleteValue(key);
+			}
+			void Print()
+			{
+				for (int i = 0; i < hashSize; ++i)
+				{
+					hashTable[i].print();
+				}
 			}
 	};
 }
 
-MTDS::HashNode<int> ourhash;
-int main()
-{
-	// HashNode<int> *ourhash = new HashNode<int>;
-	// ourhash->setValue(4);
-	// ourhash->getValue();
-}
-// #endif /* HashNode_hpp */
+// MTDS::HashNode<int> ourhash;

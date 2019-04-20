@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "HashTests.cpp"
 #include "gtest/gtest.h"
 
 GTEST_API_ int main(int argc, char **argv) {
