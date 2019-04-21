@@ -28,8 +28,7 @@ namespace MTDS
 			//destructor
 			~HashNode()
 			{
-				delete next;
-				next = nullptr;
+
 			}
 
 			//getters 
@@ -63,21 +62,51 @@ namespace MTDS
 	{
 		private:
 			HashNode<T>* head; 
-			mutable std::shared_timed_mutex _mutex;
+			// mutable std::shared_timed_mutex _mutex;
+			bool findKey(const int& key)
+			{
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				HashNode<T>* curr = prev->getNext();
+				if (curr != nullptr) curr->_mutex.lock();
+
+				while (curr!=nullptr)
+				{
+					prev->_mutex.unlock();
+					prev = curr;
+
+					if (curr->getKey() == key)
+					{
+						curr->_mutex.unlock();
+						return true;
+					}
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
+				}		
+				prev->_mutex.unlock();
+				return false;
+			}
 		public:
 
 			//destructor
 			~HashCage()
 			{
-				std::unique_lock <std::shared_timed_mutex> lock(_mutex);
-				HashNode<T>* next = head;
-				HashNode<T>* current = nullptr;
-				while (next != nullptr)
+				// std::unique_lock <std::shared_timed_mutex> lock(_mutex);
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				HashNode<T>* curr = prev->getNext();
+				if (curr != nullptr) curr->_mutex.lock();
+
+				while (curr != nullptr)
 				{
-					current = next;
-					next = next->getNext();
-					delete current;
+					prev->_mutex.unlock();
+					delete prev;
+					prev = curr;
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
 				}
+				prev->_mutex.unlock();
+				delete prev;
 				head = nullptr;
 			}
 
@@ -85,95 +114,142 @@ namespace MTDS
 			HashCage() : head(nullptr) {}
 
 			//shared_lock is used because of superioir of read over write
-			void findKeyValue(const int& key, T& value, int& result)
+			// void findKeyValue(const int& key, int& value, bool& result)
+			void findKeyValue(const int& key)
 			{
-				std::shared_lock <std::shared_timed_mutex> _lock(_mutex);
-				HashNode<T>* current = head;
-				while (current != nullptr)
+				// std::shared_lock <std::shared_timed_mutex> _lock(_mutex);
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				if (prev->getKey() == key) 
 				{
-					if (current->getKey() == key)
+					// value = prev -> getValue();
+					// result = true;
+					prev->_mutex.unlock();
+					// std::cout<<"result1: "<<result;
+					return;
+				}
+				// std::cout<<"end";
+				HashNode<T>* curr = prev->getNext();
+				if (curr != nullptr) curr->_mutex.lock();
+
+				while (curr!=nullptr)
+				{
+					prev->_mutex.unlock();
+					prev = curr;
+					if (curr->getKey() == key)
 					{
-						value = current -> getValue();
-						result = 1;
+						// value = curr -> getValue();
+						// result = true;
+						// std::cout<<"result2: "<<result;
+						// std::cout<<"1 ";
+						curr->_mutex.unlock();
+						
 						return;
 					}
-					current = current->getNext();
-				}
-				result =0;
-				value = 0;
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
+				}		
+				// std::cout<<"end";
+				// result = false;
+				// value = 0;
+				// std::cout<<"0";
+				prev->_mutex.unlock();
+				// std::cout<<"result3: "<<result;
 			}
 			//задать вопрос про bool
 			void insertValue(const int& key, const T& value)
 			{
-				std::unique_lock<std::shared_timed_mutex> _lock(_mutex);
-				HashNode<T>* current = head;
-				HashNode<T>* beforeCurrent = nullptr;
-				while (current != nullptr && current->getKey() != key)
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				HashNode<T>* curr = prev->getNext();
+				if (curr!=nullptr) curr->_mutex.lock();
+
+				while (curr!=nullptr && curr->getKey() < key)
 				{
-					beforeCurrent = current;
-					current = current->getNext();
+					prev->_mutex.unlock();
+					prev = curr;
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
 				}
-				if (current == nullptr) 
+				if (curr == nullptr)
 				{
-					if (head != nullptr)
+					auto newNode = new HashNode<T>(key, value);
+					prev->setNext(newNode);
+					prev->_mutex.unlock();
+					return;	
+				}
+				else 
+				{
+					if (curr->getKey() == key)
 					{
-						beforeCurrent->setNext(new HashNode<T>(key, value));
-					} else {
-						head=new HashNode<T>(key,value);
+						curr->_mutex.unlock();
+						prev->_mutex.unlock();
+						return;
+					} 
+					else 
+					{
+						auto newNode = new HashNode<T>(key, value);
+						newNode->setNext(curr);
+						prev->setNext(newNode);
+						curr->_mutex.unlock();
+						prev->_mutex.unlock();
 					}
+					
 				}
-				// else {
-				// 	current->setValue(value);
-				// }
+				
 			}
 
 			void deleteValue(const int&key)
 			{
 				//we can unlock unique_lock if we need
-				std::unique_lock<std::shared_timed_mutex> _lock(_mutex);
-				HashNode<T>* current = head;
-				HashNode<T>* beforeCurrent = nullptr;
-				while (current != nullptr &&  current->getKey() != key)
-				{
-					current = current->getNext();
-					beforeCurrent = current;
-				}
-				if (current != nullptr)
-				{
-					if (current == head)
-					{
-						 head = current->getNext();
-					}
-					else 
-					{ 
-						beforeCurrent->setNext(current->getNext());
-					}
-					delete current;
-				} 
+				// std::unique_lock<std::shared_timed_mutex> _lock(_mutex);
+				if (!findKey(key)) return;
 
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				HashNode<T>* curr = prev->getNext();
+				if (curr != nullptr) curr->_mutex.lock();
+
+				while (curr != nullptr && curr->getKey() != key)
+				{
+					prev->_mutex.unlock();
+					prev = curr;
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
+				}
+
+				if (curr == head)
+				{
+				 	head = curr->getNext();
+				} 
+				else 
+				{
+					prev->setNext(curr->getNext());
+				}
+				prev->_mutex.unlock();
+				if (curr != nullptr) curr->_mutex.unlock();
+				delete curr;
 			}
 			void print()
 			{
-				HashNode<T>* current = head;
-				while (current != nullptr)
+				head->_mutex.lock();
+				HashNode<T>* prev = head;
+				HashNode<T>* curr = prev->getNext();
+				if (curr != nullptr) curr->_mutex.lock();
+				while (curr!=nullptr)
 				{
-					std::cout<<current->getKey()<<" "<<current->getValue()<<std::endl;
-					current = current->getNext();
+					prev->_mutex.unlock();
+					prev = curr;
+					if (prev->getKey() !=0) std::cout<<prev->getKey()<<" "<<prev->getValue()<<std::endl;
+					curr = curr->getNext();
+					if (curr != nullptr) curr->_mutex.lock();
 				}
+				prev->_mutex.unlock();
 			}
-			// void deleteCage()
-			// {
-			// 	std::unique_lock <std::shared_mutex> lock(_mutex);
-			// 	HashNode* next = hea];
-			// 	HashNode* current = nullptr;
-			// 	while (next != nullptr)
-			// 	{
-			// 		current = next;
-			// 		next = next->next;
-			// 		delete current;
-			// 	}
-			// 	head = nullptr;
-			// }
+			void setStartHead()
+			{
+				head = new HashNode<T>(0, 0);
+			}	
 	};
 	template <typename T>
 	class HashTable
@@ -192,6 +268,10 @@ namespace MTDS
 			HashTable(size_t _hashSize = HASH_SIZE) : hashSize(_hashSize)
 			{
 				hashTable = new HashCage<int>[hashSize];
+				for (int i = 0; i < hashSize; ++i)
+				{
+					hashTable[i].setStartHead();
+				}
 			}
 
 			//destructor
@@ -206,11 +286,12 @@ namespace MTDS
             HashTable& operator=(const HashTable&) = delete;  
             HashTable& operator=(HashTable&&) = delete;
 
-			void find(const int& key,T& value, int& result)
+			// void find(const int& key, bool& result)
+			void find(const int& key)
 			{
 				size_t hashNum;
 				countHashFn(hashNum, key);
-				hashTable[hashNum].findKeyValue(key, value, result);
+				hashTable[hashNum].findKeyValue(key);
 			}
 			void insert(const int& key, const T& value)
 			{
