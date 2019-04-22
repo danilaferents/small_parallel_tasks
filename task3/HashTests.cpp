@@ -15,7 +15,7 @@ std::vector<std::string> hashFiles = {"hash_1.txt", "hash_2.txt", "hash_3.txt", 
 std::vector<std::string> hashExp = {"hash_exp.txt"};
 int testnumber = 0;
 int testnumberexp = 0;
-std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::string name_of_file)
+std::tuple <std::vector<int>, std::vector<int>, int, int> read_info_from_file(std::string name_of_file)
 {
     std::chrono::time_point<std::chrono::high_resolution_clock> start, stop;
     std::vector<std::thread> threads;
@@ -29,7 +29,8 @@ std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::s
     start = std::chrono::high_resolution_clock::now();
     input >> howmanyoperations;
     
-    std::vector<bool> findbools;
+    std::set<int> howmanyInts;
+    std::vector<int> findbools;
     std::vector<int> findints;
     for (int i = 0; i < howmanyoperations; ++i)
     {
@@ -46,6 +47,7 @@ std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::s
                 {
                     int key, value;
                     input>>key>>value;
+                    howmanyInts.insert(key);
                     threads.push_back(std::thread(&MTDS::HashTable<int>::insert, std::ref(hashMap), key, value));
                 }
                 break;
@@ -58,6 +60,7 @@ std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::s
                 {
                     int key;
                     input>>key;
+                    howmanyInts.erase(key);
                     threads.push_back(std::thread(&MTDS::HashTable<int>::deleteValue, std::ref(hashMap), key));
                 }
                 break;
@@ -66,7 +69,7 @@ std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::s
             {
                 int countOper;
                 input>>countOper;
-                findcount+=countOper;
+                // findcount+=countOper;
                 // std::cout<<". "<<countOper;
 
                 for (int j = 0; j < countOper; ++j)
@@ -75,61 +78,63 @@ std::tuple <std::vector<bool>, std::vector<int>, int> read_info_from_file(std::s
                     input>>key;  
                     findbools.push_back(0);
                     findints.push_back(0);      
-                    // threads.push_back(std::thread(&MTDS::HashTable<int>::find, std::ref(hashMap), key, std::ref(findints[j]), std::ref(findbools[j])));
-                    threads.push_back(std::thread(&MTDS::HashTable<int>::find, std::ref(hashMap), key));
+                    threads.push_back(std::thread(&MTDS::HashTable<int>::find, std::ref(hashMap), key, std::ref(findints[j]), std::ref(findbools[j])));
+                    // threads.push_back(std::thread(&MTDS::HashTable<int>::find, std::ref(hashMap), key));
                 }
                 break;
             }
             default:
             {
-                std::cout<<"Invalid input";
+                // std::cout<<"Invalid input";
             }
         }
     }
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
     testnumber++;
     
+    findcount = howmanyInts.size();
+    int findintexp = hashMap->countSize();
     stop = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> diff = (stop-start); 
     std::cout<<std::endl<<"Done!"<<std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()<<"ms."<<std::endl;
     // hashMap->Print();
     delete hashMap;
-    return std::make_tuple(findbools, findints, findcount);
+    return std::make_tuple(findbools, findints, findcount, findintexp);
 }
-// std::tuple<std::vector<int>, std::vector<int> > read_info_from_file_exp(std::string name_of_file)
-// {
-//     std::ifstream input(name_of_file);
-//     if (!input) 
-//     {
-//         std::cerr << "File did not open!"<<std::endl;
-//     }
-//     std::vector<int> expectedbools, expectedints;
-//     int exp;
-//     int count=0;
-//     input>>count;
-//     // std::cout<<"COUNT"<<count;
-//     for (int i = 0; i < count; ++i)
-//     {
-//         input>>exp;
-//         expectedbools.push_back(exp);
-//     }
-//     for (int i = 0; i < count; ++i)
-//     {
-//        input>>exp;
-//        expectedints.push_back(exp);
-//     }
-//     testnumberexp++;
-//     return std::make_tuple(expectedbools, expectedints);
-// }
+std::tuple<std::vector<int>, std::vector<int> > read_info_from_file_exp(std::string name_of_file)
+{
+    std::ifstream input(name_of_file);
+    if (!input) 
+    {
+        std::cerr << "File did not open!"<<std::endl;
+    }
+    std::vector<int> expectedbools, expectedints;
+    int exp;
+    int count=0;
+    input>>count;
+    // std::cout<<"COUNT"<<count;
+    for (int i = 0; i < count; ++i)
+    {
+        input>>exp;
+        expectedbools.push_back(exp);
+    }
+    for (int i = 0; i < count; ++i)
+    {
+       input>>exp;
+       expectedints.push_back(exp);
+    }
+    testnumberexp++;
+    return std::make_tuple(expectedbools, expectedints);
+}
 TEST(TestsHash,TestAll1)
 {
     std::vector<int> expectedbools, expectedints, ints;
-    std::vector<bool> bools;
-    int count;
+    std::vector<int> bools;
+    int count, expcount;
     // std::tie(expectedbools, expectedints) = read_info_from_file_exp(hashExp[testnumberexp]);
-    std::tie(bools, ints,count) = read_info_from_file(hashFiles[testnumber]);
+    std::tie(bools, ints,count, expcount) = read_info_from_file(hashFiles[testnumber]);
     // std::cout<<count<<".  ";
-    ASSERT_EQ(count, bools.size());
+    ASSERT_EQ(count, expcount);
     // std::cout<<bools.size()<<ints.size()<<expectedbools.size()<<expectedints.size();
     for (int i = 0; i < bools.size(); ++i)
     {
@@ -154,27 +159,45 @@ TEST(TestsHash,TestAll1)
 TEST(TestsHash,TestAll2)
 {
     std::vector<int> expectedbools, expectedints, ints;
-    std::vector<bool> bools;
-    int count;
-    std::tie(bools, ints,count) = read_info_from_file(hashFiles[testnumber]);
+    std::vector<int> bools;
+     int count, expcount;
+    std::tie(bools, ints,count,  expcount) = read_info_from_file(hashFiles[testnumber]);
+    ASSERT_EQ(count, expcount);
 
 }
 TEST(TestsHash,TestAll3)
 {
     std::vector<int> expectedbools, expectedints, ints;
-    std::vector<bool> bools;
-    int count;
-    std::tie(bools, ints,count) = read_info_from_file(hashFiles[testnumber]);
-
+    std::vector<int> bools;
+     int count, expcount;
+   std::tie(bools, ints,count,  expcount) = read_info_from_file(hashFiles[testnumber]);
+   ASSERT_EQ(count, expcount);
+   // std::cout<<count<<" "<<expcount;
 }
 TEST(TestsHash,TestAll4)
 {
     std::vector<int> expectedbools, expectedints, ints;
-    std::vector<bool> bools;
-    int count;
-    std::tie(bools, ints,count) = read_info_from_file(hashFiles[testnumber]);
+    std::vector<int> bools;
+     int count, expcount;
+    std::tie(bools, ints,count,  expcount) = read_info_from_file(hashFiles[testnumber]);
+    ASSERT_EQ(count, expcount);
 
 }
  //g++ --std=c++11 -stdlib=libc++ matrix_main.cpp matrix.cpp  -lgtest -lpthread -o MatrixTest
 //valgrind   --leak-check=full --leak-resolution=high ./MatrixTest
-
+// TEST(TestHash, TestString)
+// {
+//     MTDS::HashTable<std::string>* hashMap = new MTDS::HashTable<std::string>;
+//     std::vector<std::thread> threads;
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::insert, std::ref(hashMap), 1, "Danya"));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::insert, std::ref(hashMap), 2, "Dasha"));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::insert, std::ref(hashMap), 3, "Sasha"));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::find, std::ref(hashMap), 2));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::deleteValue, std::ref(hashMap), 1));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::deleteValue, std::ref(hashMap), 2));
+//     threads.push_back(std::thread(&MTDS::HashTable<std::string>::deleteValue, std::ref(hashMap), 3));
+//     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
+//     int findintexp = hashMap->countSize();
+//     std::cout<<findintexp<<" ";
+//     delete hashMap;
+// }

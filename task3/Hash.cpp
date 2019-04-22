@@ -7,7 +7,7 @@
 #include <functional>
 #include <string>
 constexpr size_t HASH_SIZE = 1031;
-//Multithreaded data structes library
+//Multithreaded data structs library
 namespace MTDS
 {
 	template <typename T>
@@ -248,8 +248,20 @@ namespace MTDS
 			}
 			void setStartHead()
 			{
-				head = new HashNode<T>(0, 0);
+				head = new HashNode<T>();
 			}	
+			int countSize()
+			{
+				int countsize = 0;
+				HashNode<T>* curr = head;
+
+				while (curr!=nullptr)
+				{
+					countsize+=1;
+					curr = curr->getNext();
+				}
+				return countsize;
+			}
 	};
 	template <typename T>
 	class HashTable
@@ -267,7 +279,7 @@ namespace MTDS
 			//constructor
 			HashTable(size_t _hashSize = HASH_SIZE) : hashSize(_hashSize)
 			{
-				hashTable = new HashCage<int>[hashSize];
+				hashTable = new HashCage<T>[hashSize];
 				for (int i = 0; i < hashSize; ++i)
 				{
 					hashTable[i].setStartHead();
@@ -311,6 +323,15 @@ namespace MTDS
 				{
 					hashTable[i].print();
 				}
+			}
+			int countSize()
+			{
+				int countsize = 0;
+				for (int i = 0; i < hashSize; ++i)
+				{
+					countsize+=hashTable[i].countSize();
+				}
+				return (countsize - hashSize);
 			}
 	};
 }
