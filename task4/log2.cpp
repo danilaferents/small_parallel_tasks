@@ -19,7 +19,7 @@
 #include <vector>
 #include <functional>
 
-namespace MTDS {
+namespace MTDS2 {
 	class Data {
 	public:
 		Data(const std::string msg, const std::thread::id _id, const int _flag) : threadMsg(msg), threadId(_id) {}
@@ -50,7 +50,7 @@ namespace MTDS {
 	template <typename T>
 	class Deque {
 	public:
-		Deque(){}
+		Deque(): waitData(1){}
 		~Deque()
 		{
 			std::lock_guard<std::mutex> _lock(deqmutex);
@@ -76,37 +76,36 @@ namespace MTDS {
 		T pop_font() noexcept
 		{
 			std::unique_lock<std::mutex> _lock(deqmutex);
-			while (_deque.empty()){
-				waitData.wait(_lock);
+			while (waitData){
+				_lock.unlock();
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				_lock.lock();
 			}
 			auto firstelement = std::move(_deque.front());
 			_deque.pop_front();
+			if (_deque.empty()) waitData = 1;
+			_lock.unlock();
 			return  firstelement;
 		}
 	private:
 		template <class Class>
 		void thrsafeAdd(Class&& _add)
 		{
-			int flaggg=0;
 			std::unique_lock<std::mutex> _lock(deqmutex);
-			if (_deque.empty()) flaggg = 1;
 			_add();
-			if (flaggg) 
-			{
-				waitData.notify_one();
-				_lock.unlock();
-			}
+			waitData = 0;
+			_lock.unlock();
 		}
 		std::deque<T> _deque;
 		mutable std::mutex deqmutex;
-		mutable std::condition_variable waitData;
+		int waitData;
 	};
 
 	//thread safe  deque
 	template <typename T>
 	class DequeWithLim {
 	public:
-		DequeWithLim() : _deqlim(100){}
+		DequeWithLim() : _deqlim(100), overSize(0), waitData(1) {}
 		DequeWithLim(int deqlim) : _deqlim(deqlim) {} 
 		~DequeWithLim()
 		{
@@ -132,15 +131,16 @@ namespace MTDS {
 		//noexcept - для уведмоления компилятора о невозможности ошибок
 		T pop_font() noexcept
 		{
-			int flaggg = 0;
 			std::unique_lock<std::mutex> _lock(deqmutex);
-			while (_deque.empty()){
-				waitData.wait(_lock);
+			while (waitData){
+				_lock.unlock();
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				_lock.lock();
 			}
-			if (_deque.size() == _deqlim) flaggg = 1;
 			auto firstelement = std::move(_deque.front());
 			_deque.pop_front();
-			if (flaggg) overSize.notify_all();
+			if (_deque.empty()) waitData = 1;
+			overSize = 0;
 			_lock.unlock();
 			return  firstelement;
 		}
@@ -148,24 +148,22 @@ namespace MTDS {
 		template <class Class>
 		void thrsafeAdd(Class&& _add)
 		{
-			int flaggg=0;
 			std::unique_lock<std::mutex> _lock(deqmutex);
-			if (_deque.empty()) flaggg = 1;
-			while (_deque.size() == _deqlim) {
-				overSize.wait(_lock);
+			while (overSize) {
+				_lock.unlock();
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				_lock.lock();
 			}
 			_add();
-			if (flaggg) 
-			{
-				waitData.notify_all();		
-			}
+			if (_deque.size() == _deqlim) overSize = 1;
+			waitData = 0;
 			_lock.unlock();
 		}
 		std::deque<T> _deque;
-		int _deqlim;
 		mutable std::mutex deqmutex;
-		mutable std::condition_variable waitData;
-		mutable std::condition_variable overSize;
+		int _deqlim;
+		int waitData;
+		int overSize;
 	};
 
 
