@@ -137,7 +137,11 @@ namespace MTDS {
 			while (_deque.empty()){
 				waitData.wait(_lock);
 			}
-			if (_deque.size() == _deqlim) flaggg = 1;
+			if (_deque.size() == _deqlim) 
+			{
+				// std::cout<<"Oversized";
+				flaggg = 1;
+			}
 			auto firstelement = std::move(_deque.front());
 			_deque.pop_front();
 			if (flaggg) overSize.notify_all();

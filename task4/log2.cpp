@@ -155,7 +155,11 @@ namespace MTDS2 {
 				_lock.lock();
 			}
 			_add();
-			if (_deque.size() == _deqlim) overSize = 1;
+			if (_deque.size() == _deqlim) 
+			{
+				overSize = 1;
+				// std::cout<<"Oversized";
+			}
 			waitData = 0;
 			_lock.unlock();
 		}

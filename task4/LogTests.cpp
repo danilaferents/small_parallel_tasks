@@ -20,7 +20,7 @@ TEST(TestsLog,Test1)
     std::vector<std::thread> threads;
     for (int i = 0; i < numThr; ++i)
     {
-        threads.push_back(std::thread(&MTDS::Threads::makeNote, std::ref(_threads), std::ref(_log), "Hello world!!!"));
+        threads.push_back(std::thread(&MTDS::Threads::makeNote, std::ref(_threads), std::ref(_log), "Programming!!!"));
     }
     auto loggerThr = std::thread(&MTDS::Logger::writeIntoFile, std::ref(_log), logFiles[testNum]);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
@@ -39,7 +39,7 @@ TEST(TestsLog,Test2)
     std::vector<std::thread> threads;
     for (int i = 0; i < numThr; ++i)
     {
-        threads.push_back(std::thread(&MTDS::Threads::makeNoteWithLim, std::ref(_threads), std::ref(_log), "Hello world!!!"));
+        threads.push_back(std::thread(&MTDS::Threads::makeNoteWithLim, std::ref(_threads), std::ref(_log), "Writing!!!"));
     }
     auto loggerThr = std::thread(&MTDS::Logger::writeIntoFileWithLim, std::ref(_log), logFiles[testNum]);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
@@ -58,7 +58,7 @@ TEST(TestsLog,Test3)
     std::vector<std::thread> threads;
     for (int i = 0; i < numThr; ++i)
     {
-        threads.push_back(std::thread(&MTDS2::Threads::makeNote, std::ref(_threads), std::ref(_log), "Hello world!!!"));
+        threads.push_back(std::thread(&MTDS2::Threads::makeNote, std::ref(_threads), std::ref(_log), "Working!!!"));
     }
     auto loggerThr = std::thread(&MTDS2::Logger::writeIntoFile, std::ref(_log), logFiles[testNum]);
     std::for_each(threads.begin(), threads.end(), std::mem_fn(&std::thread::join));
