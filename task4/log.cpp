@@ -22,7 +22,7 @@
 namespace MTDS {
 	class Data {
 	public:
-		Data(const std::string msg, const std::thread::id _id, const int _flag) : threadMsg(msg), threadId(_id) {}
+		Data(const std::string msg, const std::thread::id _id) : threadMsg(msg), threadId(_id) {}
 		~Data() {}
 		std::string returnMsg() const
 		{
@@ -32,14 +32,9 @@ namespace MTDS {
 		{
 			return threadId;
 		}
-		friend std::ofstream& operator<<(std::ofstream& _cout, const Data& _data)
-		{
-			_cout<<"Thread _id = "<<_data.returnId()<<std::endl<<"Message: "<<_data.returnMsg()<<std::endl;
-			return _cout;
-		}
 		friend std::ostream& operator<<(std::ostream& _cout, const Data& _data)
 		{
-			std::cout<<"Thread _id = "<<_data.returnId()<<std::endl<<"Message: "<<_data.returnMsg()<<std::endl;
+			_cout<<"Thread _id = "<<_data.returnId()<<std::endl<<"Message: "<<_data.returnMsg()<<std::endl;
 			return _cout;
 		}
 	private:
@@ -93,7 +88,7 @@ namespace MTDS {
 			_add();
 			if (flaggg) 
 			{
-				waitData.notify_one();
+				waitData.notify_all();
 				_lock.unlock();
 			}
 		}
@@ -209,9 +204,7 @@ namespace MTDS {
 			while(numThr>0)
 			{
 				auto _data = _dequewithlim.pop_font();
-				_output<<"numThr: ";
-				_output<<numThr;
-				_output<<_data;
+				_output<<"numThr: "<<numThr<<_data;
 				numThr-=1;
 			}
 			
@@ -245,7 +238,7 @@ namespace MTDS {
 			srand(static_cast<unsigned int>(time(0))); 
 			int numMult = rand() %10;
 			std::thread::id threadId = std::this_thread::get_id();
-			Data _data(msg, threadId,0);
+			Data _data(msg, threadId);
 			std::this_thread::sleep_for(timeToSleep*numMult);
 			_log.emplace(_data);
 			// _log.incrNum();
@@ -255,7 +248,7 @@ namespace MTDS {
 			srand(static_cast<unsigned int>(time(0))); 
 			int numMult = rand() %10;
 			std::thread::id threadId = std::this_thread::get_id();
-			Data _data(msg, threadId,0);
+			Data _data(msg, threadId);
 			std::this_thread::sleep_for(timeToSleep*numMult);
 			_log.emplacewithlim(_data);
 			// _log.incrNum();
