@@ -190,6 +190,8 @@ namespace MTDS {
 			while(numThr>0)
 			{
 				auto _data = _deque.pop_font();
+				_output<<"numThr: ";
+				_output<<numThr;
 				_output<<_data;
 				numThr-=1;
 			}
@@ -207,6 +209,8 @@ namespace MTDS {
 			while(numThr>0)
 			{
 				auto _data = _dequewithlim.pop_font();
+				_output<<"numThr: ";
+				_output<<numThr;
 				_output<<_data;
 				numThr-=1;
 			}
